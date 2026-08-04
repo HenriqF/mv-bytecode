@@ -1,0 +1,75 @@
+    add 
+    sub 
+    mul 
+    div 
+    mod 
+    and 
+    or  
+    xor 
+    mov
+    get
+    push
+    pop
+
+    not 
+    jeq 
+    jlt 
+    jle 
+    jgt 
+    jge 
+    jev
+    jod
+    jmp 
+    call 
+    return 
+    free
+
+operacoes:
+    triop -> 01.. 11
+    biop -> 13... 23
+
+memoria:
+    max byte qtd = 8
+
+
+    + 0 -> valor absoluto
+    +20 -> registro n
+    +40 -> ponteiro de stack no registro n
+    +60 -> ponteiro de heap no registro n
+
+
+    04 00 00 00 43 -> valor absoluto 4 bytes, 67
+     4 67
+
+    18 00 00 00 00 -> registro 4 bytes, 0
+    24 0
+
+    2C 00 00 00 02 -> ponteiro de stack no registro 4 bytes, 2
+    44 1394123
+
+
+
+
+
+
+int main(){
+
+    int_stack* stack = novo_stack();
+
+    add(stack, 10);
+    add(stack, 11);
+    mostrar(stack);
+
+    printf("%d\n", pop(stack));
+    printf("%d\n", pop(stack));
+    printf("%d\n", pop(stack));
+
+    add(stack, 6);
+    add(stack, 7);
+    mostrar(stack);
+
+    printf("%d\n", ver(stack));
+
+
+    return 0;
+}

@@ -14,11 +14,14 @@ void mostrar_memoria(int i){
 }
 
 void grow_instrucoes(){
-    instrucao** temp = realloc(instrucoes, 2*instrucoes_size);
+    size_t nt = 2*instrucoes_size;
+    instrucao** temp = realloc(instrucoes, nt*sizeof(instrucao*));
     if (temp == NULL){
         eprintf("erro ao criar espaco para novas instrucoes\n");
     }
+
     instrucoes = temp;
+    instrucoes_size = nt;
 }
 void append_instrucao(instrucao* inst){
     if (inst == NULL){
@@ -70,9 +73,6 @@ size_t get_operando_info(size_t pos, operando* op){
     for (; pos < limit; pos++){
         bytes[offset++] = script[pos];
     }
-
-    // for (int i = 0 ; i < 8; i++)printf("[%d]", bytes[i]); 
-    // printf("\n");
     
     memcpy(&op->valor, bytes, sizeof(op->valor));
     return pos;
@@ -99,6 +99,7 @@ dlong* get_valor_source(operando* op){
         default:
             return NULL;
     }
+
     return NULL;
 }
 
@@ -140,108 +141,113 @@ size_t processar_biop(size_t pos){
     return pos;
 }
 
+
 size_t executar_instrucao(size_t pos){
-    if (instrucoes[pos]->opq == 0){
-        return pos+1;
-    }
+    if (instrucoes[pos]->opq == 0) return pos+1;
 
     dlong* destino = get_valor_source(&instrucoes[pos]->opA);
 
-    int era_biop = 1;
-    switch(instrucoes[pos]->tipo){
-        case i_not:
-            (*destino) = ~(*destino);
-            ultimo_valor = (*destino);
-            break;
-        case i_jze:
-            if (ultimo_valor == 0) return (*destino);
-            return pos+1;
-        case i_jnz:
-            if (ultimo_valor != 0) return (*destino);
-            return pos+1;
-        case i_jev:
-            break;
-        case i_jod:
-            break;
-        case i_jeq:
-            break;
-        case i_jlt:
-            break;
-        case i_jleq:
-            break;
-        case i_jgt:
-            break;
-        case i_jgeq:
-            break;
-        case i_jmp:
-            return (*destino);
-        case i_call:
-            break;
-        case i_push:
-            stack_add(stak, (*destino));
-            break;
-        case i_free:
-            free((void*)(*destino));
-            (*destino) = 0;
-            break;
-        case i_pop:
-            (*destino) = stack_pop(stak);
-            ultimo_valor = (*destino);
-            break;
-        case i_top:
-            (*destino) = (stak->topo)-1;
-            ultimo_valor = (*destino);
-            break;
-        default:
-            era_biop = 0;
-            break;
+    if (instrucoes[pos]->opq == 1){
+        switch(instrucoes[pos]->tipo){
+            case i_not:
+                (*destino) = ~(*destino);
+                ultimo_valor = (*destino);
+                break;
+            case i_jzero:
+                if (ultimo_valor == 0) return (size_t)(*destino);
+                return pos+1;
+            case i_jnzero:
+                if (ultimo_valor != 0) return (size_t)(*destino);
+                return pos+1;
+            case i_jeven:
+                if ((ultimo_valor & 1) != 0) return (size_t)(*destino);
+                return pos+1;
+            case i_jodd:
+                if ((ultimo_valor & 1) == 0) return (size_t)(*destino);
+                return pos+1;
+            case i_jpos:
+                if (ultimo_valor > 0) return (size_t)(*destino);
+                return pos+1;
+            case i_jneg:
+                if (ultimo_valor < 0) return (size_t)(*destino);
+                return pos+1;
+            case i_jzpos:
+                if (ultimo_valor >= 0) return (size_t)(*destino);
+                return pos+1;
+            case i_jzneg:
+                if (ultimo_valor <= 0) return (size_t)(*destino);
+                return pos+1;
+            case i_jmp:
+                return (size_t)(*destino);
+            case i_call:
+                stack_add(stak, pos);
+                return (size_t)(*destino);
+
+                //return siop
+                break;
+            case i_push:
+                stack_add(stak, (*destino));
+                break;
+            case i_free:
+                free((void*)(*destino));
+                (*destino) = 0;
+                break;
+            case i_pop:
+                (*destino) = stack_pop(stak);
+                ultimo_valor = (*destino);
+                break;
+            case i_top:
+                (*destino) = (stak->topo)-1;
+                ultimo_valor = (*destino);
+                break;
+            default:
+                eprintf("erro com operacao biop");
+                break;
+        }
+   
+        return pos+1;
     }
 
-    if (era_biop) return pos+1;
-
-    dlong* secundario = get_valor_source(&instrucoes[pos]->opB);
-
-    int era_triop = 1;
-    switch (instrucoes[pos]->tipo){
-        case i_add:
-            (*destino) = (*destino) + (*secundario);
-            break;
-        case i_sub:
-            (*destino) = (*destino) - (*secundario);
-
-            break;
-        case i_mul:
-            (*destino) = (*destino) * (*secundario);
-            break;
-        case i_div:
-            (*destino) = (*destino) / (*secundario);
-            break;
-        case i_mod:
-            (*destino) = (*destino) % (*secundario);
-            break;
-        case i_and:
-            (*destino) = (*destino) & (*secundario);
-            break;
-        case i_or:
-            (*destino) = (*destino) | (*secundario);
-            break;
-        case i_xor:
-            (*destino) = (*destino) ^ (*secundario);
-            break;
-        case i_mov:
-            (*destino) = (*secundario);
-            break;
-        case i_get:
-            void* bytes = calloc(*secundario, sizeof(char));
-            (*secundario) = (dlong)bytes;
-            (*destino) = (*secundario);
-            break;
-        default:
-            era_triop = 0;
-            break;
-    }
-
-    if (era_triop) {
+    if (instrucoes[pos]->opq == 2){
+        dlong* secundario = get_valor_source(&instrucoes[pos]->opB);
+        switch (instrucoes[pos]->tipo){
+            case i_add:
+                (*destino) = (*destino) + (*secundario);
+                break;
+            case i_sub:
+                (*destino) = (*destino) - (*secundario);
+                break;
+            case i_mul:
+                (*destino) = (*destino) * (*secundario);
+                break;
+            case i_div:
+                (*destino) = (*destino) / (*secundario);
+                break;
+            case i_mod:
+                (*destino) = (*destino) % (*secundario);
+                break;
+            case i_and:
+                (*destino) = (*destino) & (*secundario);
+                break;
+            case i_or:
+                (*destino) = (*destino) | (*secundario);
+                break;
+            case i_xor:
+                (*destino) = (*destino) ^ (*secundario);
+                break;
+            case i_mov:
+                (*destino) = (*secundario);
+                break;
+            case i_get:
+                void* bytes = calloc(*secundario, sizeof(char));
+                (*secundario) = (dlong)bytes;
+                (*destino) = (*secundario);
+                break;
+            default:
+                eprintf("erro com operacao triop");
+                break;
+        }
+        
         ultimo_valor = (*destino);
         return pos+1;
     }
@@ -252,6 +258,7 @@ size_t executar_instrucao(size_t pos){
 
 int main(){
     stak = novo_stack();
+
     instrucoes = malloc(50*sizeof(instrucao*));
     instrucoes_size = 50;
 
@@ -277,17 +284,19 @@ int main(){
     }
 
     while (pos_instrucao < qtd_instrucao){
+        // size_t current_pos = pos_instrucao;
         pos_instrucao = executar_instrucao(pos_instrucao);
 
-        // printf("\n[t:%d av:%lld bv:%lld]", 
+
+        // printf("\n[t:%d av:%lld bv:%lld qtd:%d]", 
         //     instrucoes[current_pos]->tipo,
         //     instrucoes[current_pos]->opA.valor,
-        //     instrucoes[current_pos]->opB.valor
+        //     instrucoes[current_pos]->opB.valor,
+        //     instrucoes[current_pos]->opq
         // );
         // mostrar_memoria(0);
     }   
     mostrar_memoria(0);
-
 
     return 0;
 }

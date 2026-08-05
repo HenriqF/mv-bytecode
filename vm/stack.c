@@ -11,13 +11,15 @@ void mostrar_stack(stack* stack){
 
 stack* novo_stack(){
     stack* new_stack = malloc(sizeof(stack));
-    new_stack->itens = malloc(TAMANHO_SIG*sizeof(int));
+    new_stack->itens = malloc(TAMANHO_SIG*sizeof(long long));//mn
     new_stack->tamanho = TAMANHO_SIG;
     new_stack->topo = 0;
     return new_stack;
 }
 
 int crescer(stack* stack){
+    // printf("TAMANHO: %d\n", stack->tamanho);
+
     long long* re = realloc(stack->itens, (stack->tamanho*2) * sizeof(long long));
     if (re == NULL){
         return -1;
@@ -33,8 +35,8 @@ long long stack_add(stack* stack, long long num){
     if (stack->topo >= stack->tamanho-1){
         int res = crescer(stack);
         if (res == -1) return res;
-            
     }
+
     stack->itens[stack->topo] = num;
     return stack->topo++;
 }

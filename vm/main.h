@@ -34,21 +34,17 @@ typedef enum {
 
     //biop
     i_not, 
-    i_jze,
-    i_jnz, 
 
-    i_jev,
-    i_jod,
-
-    i_jeq,
-
-    i_jlt, 
-    i_jleq, 
-
-    i_jgt, 
-    i_jgeq, 
-
+    i_jzero,
+    i_jnzero,
+    i_jeven,
+    i_jodd,
+    i_jpos,
+    i_jneg,
+    i_jzneg,
+    i_jzpos, 
     i_jmp, 
+
     i_call, 
     i_push,
         //biop que nao pode valor absoluto

@@ -6,6 +6,10 @@
     run: cd vm & lr
     end
 
+[gdb]
+    run: cd vm & lr gdb
+    end
+
 [main]
     goto: setup
     goto: run

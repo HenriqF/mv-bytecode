@@ -184,10 +184,13 @@ void init_verbos_hash(){
         {"none", 0}, {"add", 1}, {"sub", 2},  {"mul", 3},
         {"div", 4},  {"mod", 5}, {"and", 6},  {"or", 7},
         {"xor", 8},  {"mov", 9}, {"get", 10}, {"not", 11},
-        {"jze", 12}, {"jnz", 13},{"jev", 14}, {"jod", 15},
-        {"jeq", 16}, {"jlt", 17},{"jleq", 18},{"jgt", 19},
-        {"jgeq", 20},{"jmp", 21},{"call", 22},{"push", 23},
-        {"free", 24},{"pop", 25},{"top", 26}, {"return", 27}
+
+        {"jzero", 12}, {"jnzero", 13},{"jeven", 14}, {"jodd", 15},
+        {"jpos", 16}, {"jneg", 17},{"jzneg", 18},{"jzpos", 19},
+        {"jmp", 20},
+        
+        {"call", 21},{"push", 22},
+        {"free", 23},{"pop", 24},{"top", 25}, {"return", 26}
     };
 
     for (size_t i = 0; i < sizeof(items) / sizeof(items[0]); i++) {

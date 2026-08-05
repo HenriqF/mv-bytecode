@@ -1,0 +1,12 @@
+[setup]
+    run: cd assemble & lr assemble
+    end
+
+[run]
+    run: cd vm & lr
+    end
+
+[main]
+    goto: setup
+    goto: run
+    end

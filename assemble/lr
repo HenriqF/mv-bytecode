@@ -1,0 +1,34 @@
+[build]
+    run: gcc -g main.c hash.c -o main -Wall -Wextra
+    end
+
+[clean]
+    run: del main.exe
+    end
+
+[run]
+    silent: 0
+    time_start: runtime
+    run: .\main.exe
+    time_end: runtime
+    silent: 1
+    end
+
+[gdb]
+    goto: build
+    run: gdb .\main.exe
+    end
+
+[main]
+    goto: build
+
+    goto: run 
+
+    goto: clean
+    end
+
+[assemble]
+    run: gcc main.c hash.c -o main
+    run: .\main.exe
+    run: del main.exe
+    end

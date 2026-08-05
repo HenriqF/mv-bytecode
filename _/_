@@ -1,32 +1,3 @@
-    add 
-    sub 
-    mul 
-    div 
-    mod 
-    and 
-    or  
-    xor 
-    mov
-    get
-    push
-    pop
-
-    not 
-    jeq 
-    jlt 
-    jle 
-    jgt 
-    jge 
-    jev
-    jod
-    jmp 
-    call 
-    return 
-    free
-
-operacoes:
-    triop -> 01.. 11
-    biop -> 13... 23
 
 memoria:
     max byte qtd = 8
@@ -49,27 +20,8 @@ memoria:
 
 
 
-
-
-
-int main(){
-
-    int_stack* stack = novo_stack();
-
-    add(stack, 10);
-    add(stack, 11);
-    mostrar(stack);
-
-    printf("%d\n", pop(stack));
-    printf("%d\n", pop(stack));
-    printf("%d\n", pop(stack));
-
-    add(stack, 6);
-    add(stack, 7);
-    mostrar(stack);
-
-    printf("%d\n", ver(stack));
-
-
-    return 0;
-}
+0 mov r0 1000000
+1 sub r0 1
+2 jze 4
+3 jmp 1
+4 NONE

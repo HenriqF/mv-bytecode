@@ -1,0 +1,30 @@
+#if defined(_WIN32) || defined(_WIN64)
+
+    #include <windows.h>
+
+    typedef HMODULE MODULO;
+    
+    #define load_lib(path) LoadLibrary(path)
+    #define fechar_bib(handle) FreeLibrary(handle)
+
+    #define get_func(handle, name)  GetProcAddress(handle, name)
+
+    #define nome_bib "create.dll"
+
+#else
+
+    #include <dlfcn.h>
+
+    typedef void* MODULO;
+
+    #define load_lib(path) dlopen(path, RTLD_LAZY)
+    #define fechar_bib(handle) dlclose(handle)
+
+    #define get_func(handle, name) dlsym(handle, name)
+
+    #define nome_bib "./create.so"
+
+#endif
+
+
+//bizarry

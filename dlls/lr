@@ -1,0 +1,23 @@
+[builddll]
+    run: gcc -shared create.c -o create.dll
+    end
+
+[usar]
+    run: gcc usar.c -o usar
+
+    silent: 0
+    time_start: runtime
+    run: .\usar
+    time_end: runtime 
+    silent: 1
+
+    end
+
+[main]
+    goto: builddll
+    goto: usar
+
+    run: del create.dll
+    run: del usar.exe
+
+    end

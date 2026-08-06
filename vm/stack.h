@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TAMANHO_SIG 200
+#define TAMANHO_SIG 2000
 
 typedef struct {
     long long* itens;

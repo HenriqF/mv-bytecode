@@ -10,7 +10,14 @@
     run: cd vm & lr gdb
     end
 
+[dlls]
+    run: cd dlls & lr
+    end
+
 [main]
+    #goto:setup
+    #goto: dlls
+
     goto: setup
     goto: run
     end

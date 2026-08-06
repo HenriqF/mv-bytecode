@@ -6,10 +6,16 @@ typedef int (*aura)(int numero);
 
 int main(){
     HMODULE hDll = LoadLibrary("create.dll");
-    if (hDll == NULL);
+    if (hDll == NULL){
+        printf("porra");
+        exit(0);
+    }
 
     aura funcao = (aura)GetProcAddress(hDll, "aura");
-    if (funcao == NULL);
+    if (funcao == NULL){
+        printf("aura porra");
+        exit(0);
+    }
 
     int res = funcao(67);
     printf("resposta: [%d]", res);

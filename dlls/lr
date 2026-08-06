@@ -18,6 +18,4 @@
     goto: usar
 
     run: del create.dll
-    run: del usar.exe
-
     end

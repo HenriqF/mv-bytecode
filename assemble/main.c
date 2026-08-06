@@ -32,6 +32,7 @@ size_t script_lines_qtd;
 line_def** script_lines;
 
 HashMap verbos = {50, 0, NULL};
+HashMap labels = {50, 0, NULL};
 
 void append_line(line_def* ld){
     if (script_lines_qtd >= script_lines_size){
@@ -87,6 +88,7 @@ size_t get_arg(size_t pos, size_t line_end, unsigned char bytes[]){
     }
 
     short prefixo = 8;
+
     if (script[pos] == 'r'){ 
         prefixo += 20;
         pos++;
@@ -105,12 +107,22 @@ size_t get_arg(size_t pos, size_t line_end, unsigned char bytes[]){
     num[size] = 0;
     snprintf(num, size+1, "%s", script+pos);
 
-    char* endptr;
-    long long numero = strtoll(num, &endptr ,10);
-    if (num == endptr) eprintf("deu merda convertendo numero [%s]", num);
 
-    memcpy(bytes+1, &numero, sizeof(long long));
+    long long numero;
+    if (script[pos] == '@'){
+        int* result = getValue(labels, num+1);
+        if (result == NULL) eprintf("LABEL NAO EXISTE, [%s]\n", num+1);
+
+        numero = (long long) *result;
+    }
+    else{
+        char* endptr;
+        numero = strtoll(num, &endptr ,10);
+        if (num == endptr) eprintf("deu merda convertendo numero [%s]", num);
+    }
+
     memcpy(bytes, &prefixo, 1);
+    memcpy(bytes+1, &numero, sizeof(long long));
         
     // printf("[ ");
     // for (size_t i = 0; i< sizeof(long long)+1; i++){
@@ -125,9 +137,6 @@ void process_lines(){
     for (size_t i = 0; i < script_lines_qtd; i++){
         line_def* line = script_lines[i];
 
-        if (line->end - line->start == 0) continue;
-        if (script[line->start] == '#') continue;
-
         size_t esp = line->start;
         while (esp < line->end){
             if (script[esp] == ' '){
@@ -137,6 +146,14 @@ void process_lines(){
         }
         size_t size = esp-line->start;
 
+        if (line->end - line->start == 0) continue;
+        if (script[line->start] == '#') continue;
+        if (script[line->end-1] == ':') {
+            unsigned char byte[1] = {0};
+            result_append(byte, 1);
+            continue;
+        }
+
         char* verb = malloc((size+1)*sizeof(char));
         verb[size] = 0;
         snprintf(verb, size+1, "%s", script+line->start);
@@ -144,12 +161,15 @@ void process_lines(){
         int* index = getValue(verbos, verb);
         if (index == NULL) eprintf("PALAVRA CHAVE NAO EXISTE");
 
-
         unsigned char instruct[] = {(char)(*index)};
         unsigned char bytesA[sizeof(long long)+1];
         unsigned char bytesB[sizeof(long long)+1];
 
-        if (*index >= i_add && *index <= i_get){
+        // printf("%d\n", *index);
+        if (*index == i_none || *index >= i_return && *index <= i_debug ) {
+            result_append(instruct, 1);
+        }
+        else if (*index >= i_add && *index <= i_get){
             size_t argp = line->start + size+1;
             argp = get_arg(argp, line->end, bytesA);
             get_arg(argp, line->end, bytesB);
@@ -165,13 +185,44 @@ void process_lines(){
             result_append(instruct, 1);
             result_append(bytesA, sizeof(long long)+1);
         }
-        else if (*index == i_none) {
-            result_append(instruct, 1);
-        }
 
         free(verb);
     }
 }   
+
+void process_labels(){
+    initHashmap(&labels);
+
+    size_t linha_verdade = 0;
+    for (size_t i = 0; i < script_lines_qtd; i++){
+        line_def* line = script_lines[i];
+
+        size_t esp = line->start;
+        while (esp < line->end){
+            if (script[esp] == ' '){
+                break;
+            }
+            esp++;
+        }
+
+        size_t size = esp-line->start;
+        if (size == 0){
+            continue;
+        }
+        if (script[line->end-1] != ':') {
+            linha_verdade++;
+            continue;
+        }
+
+        char* label = malloc((size+1)*sizeof(char));
+        label[size-1] = 0;
+        snprintf(label, size, "%s", script+line->start);
+        
+        if (size < 2) eprintf("NOME DE LABEL MUITO CURTO [%s]\n", label);
+
+        setKey(&labels, label, (int)(linha_verdade++));
+    }
+}
 
 void init_verbos_hash(){
     initHashmap(&verbos);
@@ -190,7 +241,7 @@ void init_verbos_hash(){
         {"jmp", 20},
         
         {"call", 21},{"push", 22},
-        {"free", 23},{"pop", 24},{"top", 25}, {"return", 26}
+        {"free", 23},{"pop", 24},{"top", 25}, {"return", 26}, {"debug", 27}
     };
 
     for (size_t i = 0; i < sizeof(items) / sizeof(items[0]); i++) {
@@ -215,6 +266,9 @@ int main(){
 
 
     get_lines();
+
+    process_labels();
+
     process_lines();
 
     printf("\n(%4zu)[ ", result_pos);

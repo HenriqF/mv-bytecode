@@ -3,10 +3,11 @@
 void mostrar_stack(stack* stack){
     printf("(%zu %zu)[ ", stack->topo, stack->tamanho);
 
+    // printf("[ ");
     for (size_t i = 0 ; i < stack->topo; i++){
         printf("%lld ", stack->itens[i]);
     }
-    printf("]\n");
+    printf("]");
 }
 
 stack* novo_stack(){

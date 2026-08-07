@@ -1,5 +1,5 @@
 [build]
-    run: gcc -g main.c stack.c -o main -Wall -Wextra
+    run: gcc main.c stack.c -o main -Wall -Wextra
     end
 
 [clean]
@@ -9,7 +9,7 @@
 [run]
     silent: 0
     time_start: runtime
-    run: .\main.exe
+    run: .\main
     time_end: runtime
     silent: 1
     end

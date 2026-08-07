@@ -36,5 +36,6 @@ typedef enum {
     //siop?
     i_return,
     i_debug,
+    i_fim,
 
 } tipo_instrucao;

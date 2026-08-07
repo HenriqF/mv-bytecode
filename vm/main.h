@@ -28,7 +28,6 @@ typedef enum {
 
 typedef struct {
     dlong valor;
-    int tamanho;
     valor_tipo tipo;
 } operando;
 
@@ -39,13 +38,12 @@ typedef struct{
     int opq;
 } instrucao;
 
-instrucao** instrucoes;
+instrucao* instrucoes;
 size_t instrucoes_size = 0;
 size_t qtd_instrucao = 0;
-size_t pos_instrucao = 0;
 
 stack* stak;
-reg regs[50];
+reg regs[REG_COUNT];
 
 operando opA;
 operando opB;

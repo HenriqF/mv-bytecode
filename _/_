@@ -20,8 +20,5 @@ memoria:
 
 
 
-0 mov r0 1000000
-1 sub r0 1
-2 jze 4
-3 jmp 1
-4 NONE
+
+#  OPERACOES ONDE DESTINO NAO PODE SER ABSOLUTO EM BIOP

@@ -18,9 +18,8 @@ void mostrar_memoria(int i){
 
 size_t get_operando_info(size_t pos, operando* op){
     int op_info = script[pos];
+    
     size_t tamanho = 0;
-
-
     if (op_info >= 60){
         tamanho = op_info-60;
         op->tipo = t_heap;
@@ -37,24 +36,20 @@ size_t get_operando_info(size_t pos, operando* op){
         tamanho = op_info;
         op->tipo = t_absoluto;
     }
-    
     if (tamanho > 8) tamanho = 8;
     
-    char bytes[8] = {0};
-    int offset = 0;
-    
-    pos++;
-    size_t limit = pos + tamanho;
-
+    size_t limit = (++pos) + tamanho;
     if (limit > script_size){
         eprintf("instrucao malformada \n");
     }
 
-    for (; pos < limit; pos++){
-        bytes[offset++] = script[pos];
+    op->valor = 0;
+    for (size_t i = 0; i < tamanho; i++) {
+        // printf("[%d]", script[pos]);
+        op->valor |= ((dlong)(unsigned char) script[pos++]) << (i*8);
     }
-    
-    memcpy(&op->valor, bytes, sizeof(op->valor));
+    // printf(": [%lld]\n", op->valor);
+
     return pos;
 }
 
@@ -133,6 +128,7 @@ size_t processar_siop(size_t pos){
 
 void parse_programa(){
     size_t i = 0;
+
     while (i < script_size){
         if (script[i] >= i_add && script[i] <= i_get){
             i = processar_triop(i);
@@ -140,7 +136,7 @@ void parse_programa(){
         else if (script[i] >= i_not && script[i] <= i_top){
             i = processar_biop(i);
         }
-        else if ((script[i] >= i_return && script[i] <= i_debug) || script[i] == i_none){
+        else if ((script[i] >= i_return && script[i] <= i_fim) || script[i] == i_none ){
             i = processar_siop(i);
         } 
         else {
@@ -153,36 +149,24 @@ void parse_programa(){
 
 //=======
 
-dlong* get_valor_stackheap(operando* op){
-    if (op->tipo == t_stack){
-        dlong pos = regs[op->valor]; 
-
-        if (pos < 0 || pos >= (dlong)stak->topo) {
-            eprintf("stack [%lld] inexistente...\n", pos);
-        }
-
-        return &stak->itens[pos];
-    }
-    if (op->tipo == t_heap){
-        return NULL;
-    }
-
-    eprintf("tipo de valor inexistente");
-    return NULL;
-}
 
 static inline dlong* get_valor_source(operando* op){
-    if (op->tipo == t_absoluto) return &op->valor;
-
-    if (op->valor < 0 || op->valor >= REG_COUNT){
-        eprintf("registro [%lld] inexistente...\n", op->valor);
+    switch (op->tipo){
+        case t_absoluto:
+            return &op->valor;
+        case t_registro:
+            return &regs[op->valor];
+        case t_stack:
+            dlong pos = regs[op->valor]; 
+            return &stak->itens[pos];
+        case t_heap:
+            return NULL;
+        default:
+            eprintf("nem eu sei");
     }
-
-    if (op->tipo == t_registro) return &regs[op->valor];
-
-    return get_valor_stackheap(op);
+    eprintf("nem eu sei");
+    return NULL;
 }
-
 
 void executar_programa(){
     static void* instrucao_tabela[] = {
@@ -220,20 +204,20 @@ void executar_programa(){
         &&op_debug,
         &&op_fim
     };
-
-    size_t pos_instrucao = 0;
-    instrucao* inst;
+    instrucao* inst = instrucoes-1;
 
     dlong* destino;
     dlong* secundario;
 
-    #define prox() \
-        do{ \
-            inst = &instrucoes[pos_instrucao++];\
-            goto *instrucao_tabela[inst->tipo];\
-        } while(0)\
-        
+    // #define prox() printf("\n%zu ", (size_t)(inst-instrucoes+1)); goto *instrucao_tabela[(++inst)->tipo]; 
+    #define prox() goto *instrucao_tabela[(++inst)->tipo]; 
 
+    #define jump() \
+        do {\
+            inst = instrucoes+(*destino);\
+            goto *instrucao_tabela[inst->tipo];\
+        } while (0)\
+        
     #define load_dest_sec()\
         destino = get_valor_source(&inst->opA);\
         secundario = get_valor_source(&inst->opB)
@@ -307,54 +291,52 @@ void executar_programa(){
 
     op_jzero:
         destino = get_valor_source(&inst->opA);
-        if (ultimo_valor == 0) pos_instrucao = (size_t)(*destino);
+        if (ultimo_valor == 0) jump();
         prox();
 
     op_jnzero:
         destino = get_valor_source(&inst->opA);
-        if (ultimo_valor != 0) pos_instrucao = (size_t)(*destino);
+        if (ultimo_valor != 0) jump();
         prox();
 
     op_jeven:
         destino = get_valor_source(&inst->opA);
-        if ((ultimo_valor & 1) != 0) pos_instrucao = (size_t)(*destino);
+        if ((ultimo_valor & 1) != 0) jump();
         prox();
 
     op_jodd:
         destino = get_valor_source(&inst->opA);
-        if ((ultimo_valor & 1) == 0) pos_instrucao = (size_t)(*destino);
+        if ((ultimo_valor & 1) == 0) jump();
         prox();
 
     op_jpos:
         destino = get_valor_source(&inst->opA);
-        if (ultimo_valor > 0) pos_instrucao = (size_t)(*destino);
+        if (ultimo_valor > 0) jump();
         prox();
 
     op_jneg:
         destino = get_valor_source(&inst->opA);
-        if (ultimo_valor < 0) pos_instrucao = (size_t)(*destino);
+        if (ultimo_valor < 0) jump();
         prox();
 
     op_jzneg:
         destino = get_valor_source(&inst->opA);
-        if (ultimo_valor <= 0) pos_instrucao = (size_t)(*destino);
+        if (ultimo_valor <= 0) jump();
         prox();
 
     op_jzpos:
         destino = get_valor_source(&inst->opA);
-        if (ultimo_valor >= 0) pos_instrucao = (size_t)(*destino);
+        if (ultimo_valor >= 0) jump();
         prox();
 
     op_jmp:
         destino = get_valor_source(&inst->opA);
-        pos_instrucao = (size_t)(*destino);
-        prox();
+        jump();
 
     op_call:
         destino = get_valor_source(&inst->opA);
-        stack_add(stak, pos_instrucao);
-        pos_instrucao = (size_t)(*destino);
-        prox();
+        stack_add(stak, inst-instrucoes);
+        jump();
 
     op_push:
         destino = get_valor_source(&inst->opA);
@@ -378,7 +360,7 @@ void executar_programa(){
         prox();
 
     op_return:
-        pos_instrucao = stack_pop(stak);
+        inst = instrucoes+stack_pop(stak);
         prox();
 
     op_debug:
@@ -386,7 +368,6 @@ void executar_programa(){
         prox();
 
     op_fim:
-        //mostrar_memoria(-67);
         return;
 }
 

@@ -146,7 +146,7 @@ void process_lines(){
         }
         size_t size = esp-line->start;
 
-        if (line->end - line->start == 0) continue;
+        if (size <= 0) continue;
         if (script[line->start] == '#') continue;
         if (script[line->end-1] == ':') {
             unsigned char byte[1] = {0};
@@ -165,11 +165,11 @@ void process_lines(){
         unsigned char bytesA[sizeof(long long)+1];
         unsigned char bytesB[sizeof(long long)+1];
 
-        // printf("%d\n", *index);
-        if (*index == i_none || *index >= i_return && *index <= i_debug ) {
+        // printf("%d\n", (*index));
+        if ((*index) == i_none || ((*index) >= i_return && (*index) <= i_debug) ) {
             result_append(instruct, 1);
         }
-        else if (*index >= i_add && *index <= i_get){
+        else if ((*index) >= i_add && (*index) <= i_get){
             size_t argp = line->start + size+1;
             argp = get_arg(argp, line->end, bytesA);
             get_arg(argp, line->end, bytesB);
@@ -178,7 +178,7 @@ void process_lines(){
             result_append(bytesA, sizeof(long long)+1);
             result_append(bytesB, sizeof(long long)+1);
         }
-        else if (*index >= i_not && *index <= i_top){
+        else if ((*index) >= i_not && (*index) <= i_top){
             size_t argp = line->start + size+1;
             get_arg(argp, line->end, bytesA);
 
@@ -227,25 +227,41 @@ void process_labels(){
 void init_verbos_hash(){
     initHashmap(&verbos);
 
-    struct {
-        char* key;
-        int value;
-    } items[] = 
+    char* items[] = 
     {
-        {"none", 0}, {"add", 1}, {"sub", 2},  {"mul", 3},
-        {"div", 4},  {"mod", 5}, {"and", 6},  {"or", 7},
-        {"xor", 8},  {"mov", 9}, {"get", 10}, {"not", 11},
-
-        {"jzero", 12}, {"jnzero", 13},{"jeven", 14}, {"jodd", 15},
-        {"jpos", 16}, {"jneg", 17},{"jzneg", 18},{"jzpos", 19},
-        {"jmp", 20},
-        
-        {"call", 21},{"push", 22},
-        {"free", 23},{"pop", 24},{"top", 25}, {"return", 26}, {"debug", 27}
+       "none",
+       "add",
+       "sub", 
+       "mul", 
+       "div", 
+       "mod", 
+       "and", 
+       "or", 
+       "xor", 
+       "mov",
+       "get",
+       "not", 
+       "jzero",
+       "jnzero",
+       "jeven",
+       "jodd",
+       "jpos",
+       "jneg",
+       "jzneg",
+       "jzpos", 
+       "jmp", 
+       "call", 
+       "push",
+       "free",
+       "pop",
+       "top",
+       "return",
+       "debug",
+       "fim",
     };
 
     for (size_t i = 0; i < sizeof(items) / sizeof(items[0]); i++) {
-        setKey(&verbos, items[i].key, items[i].value);
+        setKey(&verbos, items[i], i);
     }
 
     return;
@@ -264,11 +280,8 @@ int main(){
     result = malloc(2*script_size);
     result_size = 2*script_size;
 
-
     get_lines();
-
     process_labels();
-
     process_lines();
 
     printf("\n(%4zu)[ ", result_pos);
@@ -276,7 +289,6 @@ int main(){
         printf("%d ", result[i]);
     }
     printf("]\n");
-
 
     f = fopen("../_/script.vm", "wb");
     writeFileN(f, result, result_pos);

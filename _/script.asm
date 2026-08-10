@@ -37,8 +37,10 @@ fib_recursivo:
 
 
 inicio:
-    mov r0 40
+    mov r0 30
 
     push r0
     call @fib_recursivo
     pop r0
+
+    debug

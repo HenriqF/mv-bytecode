@@ -1,46 +1,29 @@
-jmp @inicio
+mov r1 5
+get r0 r1
+mov r2 r1
 
+debug
 
-fib_recursivo:
-    push r0
-    push r1
-    push r2
-    top r2
-    sub r2 4
-    mov r0 s2
+loop:
+    sub r2 1
 
-    push r0
-    sub r0 1
-    pop r0
-    jzneg @fim_funcao
-
-    mov r1 r0
-
-    sub r0 1
-    push r0
-    call @fib_recursivo
-    pop r0
-
-    sub r1 2
-    push r1
-    call @fib_recursivo
-    pop r1
-
-    add r0 r1
-
-    fim_funcao:
-        mov s2 r0
-        pop r2
-        pop r1
-        pop r0
-        return
-
-
-inicio:
-    mov r0 30
-
-    push r0
-    call @fib_recursivo
-    pop r0
-
+    add r0 r2
+    mov h0 r2
+    mov r8 h0
     debug
+    sub r0 r2
+
+    cmp r2 1
+    jzpos @loop
+
+
+loop2:
+    add r0 r2
+    mov r8 h0
+    debug
+    sub r0 r2
+
+
+    add r2 1
+    cmp r2 r1
+    jzneg @loop2

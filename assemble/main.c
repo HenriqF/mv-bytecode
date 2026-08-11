@@ -169,7 +169,7 @@ void process_lines(){
         if ((*index) == i_none || ((*index) >= i_return && (*index) <= i_debug) ) {
             result_append(instruct, 1);
         }
-        else if ((*index) >= i_add && (*index) <= i_get){
+        else if ((*index) >= i_add && (*index) <= i_cmp){
             size_t argp = line->start + size+1;
             argp = get_arg(argp, line->end, bytesA);
             get_arg(argp, line->end, bytesB);
@@ -240,6 +240,7 @@ void init_verbos_hash(){
        "xor", 
        "mov",
        "get",
+       "cmp",
        "not", 
        "jzero",
        "jnzero",

@@ -33,23 +33,23 @@ int crescer(stack* stack){
 }
 
 long long stack_add(stack* stack, long long num){
-    if (stack->topo >= stack->tamanho-1){
-        int res = crescer(stack);
-        if (res == -1) return res;
-    }
+    // if (stack->topo >= stack->tamanho-1){
+    //     int res = crescer(stack);
+    //     if (res == -1) return res;
+    // }
 
     stack->itens[stack->topo] = num;
     return stack->topo++;
 }
 
 long long stack_pop(stack* stack){
-    if (stack->topo <= 0) return 0;
+    //if (stack->topo <= 0) return 0;
 
     return(stack->itens[--stack->topo]);
 }
 
 long long stack_ver(stack* stack){
-    if (stack->topo <= 0) return 0;
+    //if (stack->topo <= 0) return 0;
 
     return(stack->itens[stack->topo-1]);
 }

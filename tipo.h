@@ -12,6 +12,7 @@ typedef enum {
     i_xor, 
     i_mov,
     i_get,
+    i_cmp,
 
     //biop
     i_not, 

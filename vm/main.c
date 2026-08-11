@@ -130,7 +130,7 @@ void parse_programa(){
     size_t i = 0;
 
     while (i < script_size){
-        if (script[i] >= i_add && script[i] <= i_get){
+        if (script[i] >= i_add && script[i] <= i_cmp){
             i = processar_triop(i);
         }
         else if (script[i] >= i_not && script[i] <= i_top){
@@ -160,7 +160,8 @@ static inline dlong* get_valor_source(operando* op){
             dlong pos = regs[op->valor]; 
             return &stak->itens[pos];
         case t_heap:
-            return NULL;
+            // printf("{%p, %zu}\n", (dlong*)op->valor, op->valor);
+            return (dlong*)regs[op->valor];
         default:
             eprintf("nem eu sei");
     }
@@ -182,6 +183,7 @@ void executar_programa(){
         &&op_xor, 
         &&op_mov,
         &&op_get,
+        &&op_cmp,
 
         &&op_not, 
         &&op_jzero,
@@ -275,14 +277,20 @@ void executar_programa(){
 
     op_mov:
         load_dest_sec();
+       // printf("PORRA [%zu][%zu]\n", (*secundario), secundario);
         (*destino) = (*secundario);
         prox();
 
     op_get:
         load_dest_sec();
-        void* bytes = calloc(*secundario, sizeof(char));
-        (*secundario) = (dlong)bytes;
-        (*destino) = (*secundario);
+        void* bytes = calloc(*secundario, sizeof(dlong));
+        dlong temp = (dlong)bytes;
+        (*destino) = temp;
+        prox();
+
+    op_cmp:
+        load_dest_sec();
+        ultimo_valor = (*destino) - (*secundario);
         prox();
 
     op_not:

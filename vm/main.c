@@ -161,7 +161,7 @@ static inline dlong* get_valor_source(operando* op){
             return &stak->itens[pos];
         case t_heap:
             // printf("{%p, %zu}\n", (dlong*)op->valor, op->valor);
-            return (dlong*)regs[op->valor];
+            return (dlong*)(regs[op->valor] * 8);
         default:
             eprintf("nem eu sei");
     }
@@ -284,8 +284,7 @@ void executar_programa(){
     op_get:
         load_dest_sec();
         void* bytes = calloc(*secundario, sizeof(dlong));
-        dlong temp = (dlong)bytes;
-        (*destino) = temp;
+        (*destino) = (dlong)bytes / 8;
         prox();
 
     op_cmp:

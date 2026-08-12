@@ -227,44 +227,45 @@ void process_labels(){
 void init_verbos_hash(){
     initHashmap(&verbos);
 
-    char* items[] = 
-    {
-       "none",
-       "add",
-       "sub", 
-       "mul", 
-       "div", 
-       "mod", 
-       "and", 
-       "or", 
-       "xor", 
-       "mov",
-       "get",
-       "cmp",
-       "not", 
-       "jzero",
-       "jnzero",
-       "jeven",
-       "jodd",
-       "jpos",
-       "jneg",
-       "jzneg",
-       "jzpos", 
-       "jmp", 
-       "call", 
-       "push",
-       "free",
-       "pop",
-       "top",
-       "return",
-       "debug",
-       "fim",
+    struct {
+        char* key;
+        int value;
+    } items[] = {
+        {"none", 0},
+        {"add", 1},
+        {"sub", 2},
+        {"mul", 3},
+        {"div", 4},
+        {"mod", 5},
+        {"and", 6},
+        {"or", 7},
+        {"xor", 8},
+        {"mov", 9},
+        {"get", 10},
+        {"cmp", 11},
+        {"not", 12},
+        {"jzero", 13}, {"jequal", 13},
+        {"jnzero", 14}, {"jdiff", 14},
+        {"jeven", 15}, 
+        {"jodd", 16},
+        {"jpos", 17}, {"jbigger", 17},
+        {"jneg", 18}, {"jsmaller", 18},
+        {"jzneg", 19}, {"jeqsmaller", 19},
+        {"jzpos", 20}, {"jeqbigger", 20},
+        {"jmp", 21}, {"goto", 21},
+        {"call", 22},
+        {"push", 23},
+        {"free", 24},
+        {"pop", 25},
+        {"top", 26},
+        {"return", 27},
+        {"debug", 28},
+        {"fim", 29}
     };
 
     for (size_t i = 0; i < sizeof(items) / sizeof(items[0]); i++) {
-        setKey(&verbos, items[i], i);
+        setKey(&verbos, items[i].key, items[i].value);
     }
-
     return;
 }
 
